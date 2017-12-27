@@ -7,6 +7,16 @@
 // -----------------------------------------------------------------------------------------------------------
 
 
+$interval = 24;
+$hours_from_last_migration = hours_from_last_migration();
+if ($hours_from_last_migration< 24)
+	$interval = $hours_from_last_migration;
+$threashold = 6;
+if ($hours_from_last_migration < 14)
+	$threashold = 5;
+if ($hours_from_last_migration < 6)
+	$threashold = 4;
+
 $pokemon_exclude_sql = "";
 if (!empty($config->system->nest_exclude_pokemon)) {
 	$pokemon_exclude_sql = "AND p.pokemon_id NOT IN (".implode(",", $config->system->nest_exclude_pokemon).")";
@@ -15,10 +25,10 @@ if (!empty($config->system->nest_exclude_pokemon)) {
 $req = "SELECT p.pokemon_id, max(p.latitude) AS latitude, max(p.longitude) AS longitude, count(p.pokemon_id) AS total_pokemon, s.kind, s.latest_seen
         FROM pokemon p 
         INNER JOIN spawnpoint s ON (p.spawnpoint_id = s.id) 
-        WHERE p.disappear_time > UTC_TIMESTAMP() - INTERVAL 24 HOUR 
+        WHERE p.disappear_time > UTC_TIMESTAMP() - INTERVAL $interval HOUR 
         ".$pokemon_exclude_sql." 
         GROUP BY p.spawnpoint_id, p.pokemon_id 
-        HAVING count(p.pokemon_id) >= 6 
+        HAVING count(p.pokemon_id) >= $threashold 
         ORDER BY p.pokemon_id";
 $result = $mysqli->query($req);
 
