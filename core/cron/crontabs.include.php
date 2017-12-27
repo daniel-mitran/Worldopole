@@ -83,6 +83,7 @@ $nests_file = SYS_PATH.'/core/json/nests.stats.json';
 
 $hours_from_last_migration = hours_from_last_migration();
 if ($hours_from_last_migration<24) {
+	echo "Updating nests info file\n";
 	// set file mtime to now before executing long running queries
 	// so we don't try to update the file twice
 	touch($nests_file);
@@ -92,12 +93,14 @@ if ($hours_from_last_migration<24) {
 	
 // Do not update both files at the same time to lower cpu load
 if (file_update_ago($pokedex_rarity_file) > $update_delay) {
+	echo "Updating rarity file\n";
 	// set file mtime to now before executing long running queries
 	// so we don't try to update the file twice
 	touch($pokedex_rarity_file);
 	// update pokedex rarity
 	include_once(SYS_PATH.'/core/cron/pokedex_rarity.cron.php');
 } elseif (file_update_ago($nests_file) > $update_delay) {
+	echo "Updating nests info file\n";
 	// set file mtime to now before executing long running queries
 	// so we don't try to update the file twice
 	touch($nests_file);
